@@ -1,0 +1,24 @@
+{
+	"builders": [{
+		"type": "amazon-ebs",
+		"region": "{{user `region`}}",
+		"source_ami": "{{user `source_ami`}}",
+		"instance_type": "{{user `instance_type`}}",
+		"ssh_username": "ec2-user",
+		"ami_name": "packer-amazonlinux2-{{timestamp}}",
+		"ami_description": "packer create ami demo",
+		"tags": {
+			"Name": "packer ami demo",
+			"OS_Version": "Amazon Linux 2",
+			"Release": "v0.1",
+			"CreatedDate": "{{timestamp}}",
+			"Maintainer": "phyominhtun1990@gmail.com"
+		}
+	}],
+
+	"provisioners": [{
+		"type": "shell",
+		"execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+		"script": "./initial-provision-script.sh"
+	}]
+}

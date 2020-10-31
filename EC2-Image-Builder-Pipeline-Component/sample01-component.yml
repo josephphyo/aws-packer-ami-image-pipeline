@@ -1,0 +1,49 @@
+name: EC2ImageAMIBuilderDocument
+description: This document builds an AMI
+schemaVersion: 1.0
+
+phases:
+  - name: build
+    steps:
+      - name: Echo-Text
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'echo "Building an AMI with AWS EC2 Image Builder!"'
+      - name: Update-yum
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'yum update -y'
+      - name: Install-httpd
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'yum -y install httpd'
+      - name: enable-httpd
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'systemctl enable httpd'
+      - name: start-httpd
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'systemctl start httpd' 
+      - name: create-index
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'echo "EC2 Image Builder Created - OpsLAB" >> /var/www/html' 
+      - name: restart-httpd
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'systemctl restart httpd'       
+  - name: test
+    steps:
+      - name: curl-httpd
+        action: ExecuteBash
+        inputs:
+          commands:
+            - 'curl localhost'

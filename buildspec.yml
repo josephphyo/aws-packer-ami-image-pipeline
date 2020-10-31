@@ -1,0 +1,27 @@
+---
+version: 0.2
+ 
+phases:
+  pre_build:
+    commands:
+      - echo "Installing HashiCorp Packer..."
+      - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.6.4/packer_1.6.4_linux_amd64.zip && unzip packer.zip
+      - echo "Installing jq..."
+      - curl -qL -o jq https://stedolan.github.io/jq/download/linux64/jq && chmod +x ./jq
+      - echo "Validating Packer amz2linux-template.json Template" 
+      - ./packer validate -var-file=variable.json amz2linux-template.json
+  build:
+    commands:
+     ### Packer can not support Codebuild Roles , use with manual
+      - echo "Configuring AWS credentials"
+      - curl -qL -o aws_credentials.json http://169.254.170.2/$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI > aws_credentials.json
+      - aws configure set region $AWS_REGION
+      - echo "AWS region set is:" $AWS_REGION
+      - aws configure set aws_access_key_id `./jq -r '.AccessKeyId' aws_credentials.json`
+      - aws configure set aws_secret_access_key `./jq -r '.SecretAccessKey' aws_credentials.json`
+      - aws configure set aws_session_token `./jq -r '.Token' aws_credentials.json`
+      - echo "Building HashiCorp Packer template, amz2linux-template.json"
+      - ./packer build -var-file=variable.json amz2linux-template.json
+  post_build:
+    commands:
+      - echo "Packer build completed on `date`"
